@@ -11,7 +11,24 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['firstname', 'middlename', 'lastname', 'suffix', 'username', 'role', 'email', 'password'])]
+#[Fillable(['firstname',
+        'middlename',
+        'lastname',
+        'suffix',
+        'username',
+        'role',
+        'email',
+        'password',
+        'contact',
+        'address',
+        'birthday',
+        'birthplace',
+        'qr_code',
+        'sex',
+        'height',
+        'weight',
+        'status',])]
+        
 #[Hidden('password')]
 class User extends Authenticatable
 {
@@ -29,5 +46,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function isAdmin(): bool{
+        return $this->role === 'admin';
     }
 }

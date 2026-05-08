@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('birthday')->nullable();
             $table->string('birthplace')->nullable();
             $table->text('qr_code')->nullable();
-            $table->enum('sex', ['male', 'femail'])->nullable();
+            $table->enum('sex', ['male', 'female'])->nullable();
             $table->decimal('height', 5, 2)->nullable();
             $table->decimal('weight', 5, 2)->nullable();
             $table->string('email')->unique();

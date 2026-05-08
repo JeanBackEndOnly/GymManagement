@@ -16,4 +16,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::middleware('admin')
+        ->group(function (){
+            
+        });
 });

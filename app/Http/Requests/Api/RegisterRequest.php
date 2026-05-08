@@ -22,6 +22,7 @@ class RegisterRequest extends FormRequest
             'suffix' => 'nullable|string|in:jr,II,III,IV,V,VI',
             'username' => 'required|string|unique:users,username|max:255',
             'email' => 'required|string|email|unique:users,email|max:255', 
+            'role' => 'required|string|in:member,admin,cashier,staff',
             'password' => [
                 'required',
                 'string',
