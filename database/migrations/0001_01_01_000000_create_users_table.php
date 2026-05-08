@@ -27,6 +27,8 @@ return new class extends Migration
             $table->decimal('weight', 5, 2)->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('profile')->nullable();
+            $table->string('icon')->nullable();
             $table->string('username')->unique();
             $table->string('password');
             $table->enum('status', ['active', 'inactive'])->default('active');
