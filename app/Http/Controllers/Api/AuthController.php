@@ -20,15 +20,17 @@ class AuthController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
-                'success' => true,
+                'status' => 'success',
                 'message' => 'Registered Successfully.',
-                'user' => $user,
-                'token' => $token
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ],
             ], 201);
         } catch (\Throwable  $e) {
             Log::error('Register failed: ' . $e->getMessage());
             return response()->json([
-                'success' => false,
+                'status' => 'error',
                 'message' => 'Register failed, please try again.'
             ], 500);
         }
