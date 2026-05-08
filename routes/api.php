@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Admin\UserController;
 
 
 Route::post('/register', [AuthController::class, 'register'])
@@ -19,6 +20,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     Route::middleware('admin')
         ->group(function (){
-            
+            Route::apiResource('users', UserController::Class);
         });
 });

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\api;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,7 +23,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|string|max:255',
+            'email' => 'required|string|email',
             'password' => 'required|string'
         ];
     }

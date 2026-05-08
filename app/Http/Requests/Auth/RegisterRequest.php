@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -20,9 +20,7 @@ class RegisterRequest extends FormRequest
             'middlename' => 'string|max:255',
             'lastname' => 'required|string|max:255',
             'suffix' => 'nullable|string|in:jr,II,III,IV,V,VI',
-            'username' => 'required|string|unique:users,username|max:255',
             'email' => 'required|string|email|unique:users,email|max:255', 
-            'role' => 'required|string|in:member,admin,cashier,staff',
             'password' => [
                 'required',
                 'string',
@@ -34,3 +32,4 @@ class RegisterRequest extends FormRequest
         ]; 
     }
 }
+// 2|RkdzPBieT0d5zoqi1MqeOomFNBQX9UlZegy4FtrU2a250719
