@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\Admin\UserCreateRequest;
+use App\Http\Requests\Admin\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -41,6 +42,18 @@ class UserController extends Controller
                 'status' => 0,
                 'message' => 'Creating user failed. Please try again.',
             ], 500);
+        }
+    }
+
+    public function update(UserUpdateRequest $request, User $user){
+        try {
+            $this->authorize('update', $user);
+        } catch (\Throwable $e) {
+            \Log::error('An error occured: ' . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Update user failed, please try again.'
+            ]);
         }
     }
 }
