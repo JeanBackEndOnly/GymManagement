@@ -39,11 +39,11 @@ class UserUpdateRequest extends FormRequest
             'sex'        => ['nullable', 'string', 'in:male,female'],
             'height'     => ['nullable', 'numeric', 'min:0'],
             'weight'     => ['nullable', 'numeric', 'min:0'],
-            'email'      => ['required', 'string', 'email', 'max:255'],
-            'profile'    => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'email'      => ['nullable', 'string', 'email', 'max:255'],
+            'profile'    => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'icon'       => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:1024'],
             'password'   => [
-                'required',
+                'nullable',
                 'string',
                 'confirmed',
                 Password::min(8)
