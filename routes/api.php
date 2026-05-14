@@ -20,6 +20,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     Route::middleware('admin')
         ->group(function (){
-            Route::apiResource('users', UserController::Class);
+            Route::apiResource('users', UserController::class);
         });
 });
