@@ -17,9 +17,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     Route::middleware('admin')
         ->group(function (){
+            // Resource Routes
             Route::apiResource('users', UserController::class);
         });
 });

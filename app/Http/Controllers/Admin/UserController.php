@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -74,12 +75,81 @@ class UserController extends Controller
                 'status' => 1,
                 'message' => $user->firstname . ' updated successfully.',
                 'data' => $user->fresh(),
-            ]);
+            ], 201);
         } catch (\Throwable $e) {
             \Log::error('Update user failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 0,
                 'message' => 'Update user failed. Please try again.',
+            ], 500);
+        }
+    }
+    
+    public function show(User $user)
+    {
+        try {
+            $this->authorize('view', $user);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'User fetched successfully.',
+                'data' => $user,
+            ], 201);
+        } catch (\Throwable $e) {
+            \Log::error('View user failed: ' . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Failed to fetch user data. Please try again.',
+            ], 500);
+        }
+    }
+
+    public function index()
+    {
+        try {
+            $this->authorize('viewAny', User::class);
+
+            $users = User::all();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Users fetched successfully.',
+                'data' => $users,
+            ], 201);
+        } catch (\Throwable $e) {
+            \Log::error('Fetch users failed: ' . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Failed to fetch user data. Please try again.',
+            ], 500);
+        }
+    }
+
+    public function destroy(User $user)
+    {
+        try {
+            $this->authorize('delete', $user);
+            
+            if ($user->profile && Storage::disk('public')->exists($user->profile)) {
+                Storage::disk('public')->delete($user->profile);
+            }
+
+            if ($user->icon && Storage::disk('public')->exists($user->icon)) {
+                Storage::disk('public')->delete($user->icon);
+            }
+
+            $name = $user->firstname . ' ' . $user->lastname;
+            $user->delete(); 
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'User ' . $name . ' deleted successfully.',
+            ], 201);
+        } catch (\Throwable $e) {
+            \Log::error('Delete user failed: ' . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Failed to delete user. Please try again.',
             ], 500);
         }
     }
