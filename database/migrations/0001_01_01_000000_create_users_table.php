@@ -26,6 +26,7 @@ return new class extends Migration
             $table->decimal('height', 5, 2)->nullable();
             $table->decimal('weight', 5, 2)->nullable();
             $table->string('email')->unique();
+            $table->string('username')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('profile')->nullable();
             $table->string('icon')->nullable();

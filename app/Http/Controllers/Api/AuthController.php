@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -26,7 +27,7 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Registered Successfully.',
                 'data' => [
-                    'user' => $user,
+                    'user' => new UserResource($user),
                     'token' => $token,
                 ],
             ], 201);
@@ -41,7 +42,9 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         try {
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)
+                ->orWhere('username', $request->email)
+                ->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
@@ -50,6 +53,7 @@ class AuthController extends Controller
                 ], 401);
             }
 
+            // Delete ALL old tokens (no currentAccessToken check needed)
             $user->tokens()->delete();
 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -58,7 +62,7 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Logged in successfully.',
                 'data' => [
-                    'user' => $user,
+                    'user' => new UserResource($user),
                     'token' => $token,
                 ],
             ], 200);
@@ -70,11 +74,23 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    public function logout()
+    {
+        $user = auth('sanctum')->user();
 
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logged out successfully.',
+        ]);
+    }
     public function changePassword(ChangePasswordRequest $request)
     {
         try {
-            $user = auth()->user();
+            $user = auth('sanctum')->user();
 
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
@@ -87,8 +103,11 @@ class AuthController extends Controller
                 'password' => Hash::make($request->new_password),
             ]);
 
-            $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
-
+            // Revoke other tokens safely
+            $currentToken = $user->currentAccessToken();
+            if ($currentToken) {
+                $user->tokens()->where('id', '!=', $currentToken->id)->delete();
+            }
             return response()->json([
                 'status' => 'success',
                 'message' => 'Password changed successfully.',

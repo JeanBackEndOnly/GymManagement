@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\Admin\UserCreateRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -36,7 +37,7 @@ class UserController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => 'Member registered successfully.',
-                'data' => $user,
+                'data' => new UserResource($user),
             ], 201);
         } catch (\Throwable $e) {
             Log::error('User creation failed: ' . $e->getMessage());
@@ -74,8 +75,8 @@ class UserController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => $user->firstname . ' updated successfully.',
-                'data' => $user->fresh(),
-            ], 201);
+                'data' => new UserResource($user->fresh()),
+            ], 200);
         } catch (\Throwable $e) {
             Log::error('Update user failed: ' . $e->getMessage());
             return response()->json([
@@ -93,8 +94,8 @@ class UserController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => 'User fetched successfully.',
-                'data' => $user,
-            ], 201);
+                'data' => new UserResource($user),
+            ], 200);
         } catch (\Throwable $e) {
             \Log::error('View user failed: ' . $e->getMessage());
             return response()->json([
@@ -104,18 +105,38 @@ class UserController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             $this->authorize('viewAny', User::class);
 
-            $users = User::all();
+            $users = User::query()
+                ->when($request->search, function ($query) use ($request) {
+                    $query->where(function ($q) use ($request) {
+                        $q->where('firstname', 'like', "%{$request->search}%")
+                        ->orWhere('lastname', 'like', "%{$request->search}%")
+                        ->orWhere('email', 'like', "%{$request->search}%")
+                        ->orWhere('username', 'like', "%{$request->search}%");
+                    });
+                })
+                ->when($request->role, function ($query) use ($request) {
+                    $query->where('role', $request->role);
+                })
+                ->when($request->status, function ($query) use ($request) {
+                    $query->where('status', $request->status);
+                })
+                ->paginate($request->per_page ?? 15);
+
+            // Apply UserResource to the paginated collection
+            $users->getCollection()->transform(function ($user) {
+                return new UserResource($user);
+            });
 
             return response()->json([
                 'status' => 1,
                 'message' => 'Users fetched successfully.',
                 'data' => $users,
-            ], 201);
+            ], 200);
         } catch (\Throwable $e) {
             \Log::error('Fetch users failed: ' . $e->getMessage());
             return response()->json([
@@ -144,7 +165,7 @@ class UserController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => 'User ' . $name . ' deleted successfully.',
-            ], 201);
+            ], 200);
         } catch (\Throwable $e) {
             \Log::error('Delete user failed: ' . $e->getMessage());
             return response()->json([
@@ -152,5 +173,29 @@ class UserController extends Controller
                 'message' => 'Failed to delete user. Please try again.',
             ], 500);
         }
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $this->authorize('updateRole', $user);
+
+        $request->validate([
+            'role' => ['required', 'string', 'in:member,admin,cashier,staff'],
+        ]);
+
+        // Prevent self-demotion (admin can't remove their own admin role)
+        if (auth('sanctum')->id() === $user->id) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'You cannot change your own role.',
+            ], 403);
+        }
+
+        $user->update(['role' => $request->role]);
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Role updated successfully.',
+        ]);
     }
 }

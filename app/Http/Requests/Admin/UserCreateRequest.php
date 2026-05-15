@@ -40,6 +40,7 @@ class UserCreateRequest extends FormRequest
             'height'     => ['nullable', 'numeric', 'min:0'],
             'weight'     => ['nullable', 'numeric', 'min:0'],
             'email'      => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'username'      => ['required', 'string', 'max:255', 'unique:users,username'],
             'profile'    => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'icon'       => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:1024'],
             'password'   => [
@@ -51,7 +52,7 @@ class UserCreateRequest extends FormRequest
                     ->symbols(),
             ],
             'status'     => ['nullable', 'string', 'in:active,inactive'],
-            'role'       => ['nullable', 'string', 'in:member,admin,cashier,staff'],
+            // 'role'       => ['nullable', 'string', 'in:member,admin,cashier,staff'],
         ];
     }
 }

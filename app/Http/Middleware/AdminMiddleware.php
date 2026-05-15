@@ -15,7 +15,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!auth()->check() || !auth()->user()->isAdmin()){
+        if (!auth('sanctum')->check() || !auth('sanctum')->user()->isAdmin()) {
             abort(403, 'Admin access only.');
         }
         return $next($request);
